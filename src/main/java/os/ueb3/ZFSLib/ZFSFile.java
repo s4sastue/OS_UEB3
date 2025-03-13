@@ -29,9 +29,7 @@ public class ZFSFile {
     }
 
     public static ZFSFile createFile(String poolName, String datasetName, String filePath, String filename){
-        var file = new ZFSFile(poolName, datasetName, filePath, filename);
-
-        return file;
+        return new ZFSFile(poolName, datasetName, filePath, filename);
     }
 
     public static ZFSFile readFile(String poolName, String datasetName, String filePath, String filename) throws IOException {
@@ -72,7 +70,7 @@ public class ZFSFile {
         this.content = ByteBuffer.wrap(content.getBytes(StandardCharsets.UTF_8));
     }
 
-    public void writeFile() throws IOException, InterruptedException {
+    public boolean writeFile() throws IOException, InterruptedException {
         boolean doesFileExists = Files.exists(path);
 
         FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
@@ -88,11 +86,15 @@ public class ZFSFile {
 
         if(lastModifiedTimeAtReading != null && lastModifiedTimeAtReading.equals(lastModifiedTime)
                 || !doesFileExists && lastModifiedTimeAtReading == null
-        ){}
+        ){
+            lock.release();
+            return true;
+        }
         else{
             ZFSUtils.rollbackZFSSnapshot(poolName, datasetName, snapshotName, filePath,  filename);
+            lock.release();
+            return false;
         }
 
-        lock.release();
     }
 }

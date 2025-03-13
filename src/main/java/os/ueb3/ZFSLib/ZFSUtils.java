@@ -11,7 +11,6 @@ public class ZFSUtils {
     private static ZFSUtils.Mode mode;
 
     static void createZFSSnapshot(String poolName, String datasetName, String snapshotName) throws IOException, InterruptedException {
-        System.out.println("sudo zfs snapshot " + poolName + "/" + datasetName + "@" + snapshotName);
         System.out.println("Creating ZFS snapshot: " + snapshotName);
 
         ProcessBuilder processBuilder = new ProcessBuilder("sudo", "zfs", "snapshot", poolName + "/" + datasetName + "@" + snapshotName);
@@ -29,8 +28,6 @@ public class ZFSUtils {
         switch (mode){
             case SINGLE_FILE:
                 System.out.println("Rolling back single file (" + filePath + "/" + filename +  ") from snapshot: " + snapshotName);
-                System.out.println("cp /home/stuelbsasc/.zfs/snapshot/XYZ/Downloads/test/test2.txt /home/stuelbsasc/Downloads/test/test2.txt");
-                System.out.println("cp /" + poolName + "/" + datasetName + "/.zfs/snapshot/" + snapshotName + "/" + filePath + "/" + filename + " /" + poolName + "/" + datasetName + "/" + filePath + "/" + filename);
 
                 processBuilder = new ProcessBuilder("cp",
                         "/" + poolName + "/" + datasetName + "/.zfs/snapshot/" + snapshotName + "/" + filePath + "/" + filename,
@@ -47,7 +44,7 @@ public class ZFSUtils {
             case null:
             default:
                 System.out.println("Rolling back ZFS snapshot: " + snapshotName);
-                System.out.println("sudo zfs rollback -r osUeb3Pool/Brainstorming@t1");
+
                 processBuilder = new ProcessBuilder("sudo", "zfs", "rollback", "-r", poolName + "/" + datasetName + "@" + snapshotName);
                 processBuilder.redirectErrorStream(true);
 
